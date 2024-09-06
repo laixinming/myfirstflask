@@ -24,7 +24,26 @@ def hello():
 
 @app.route('/test')
 def test():
-    return 'Test'
+    # 获取客户端 IP 地址
+    real_ip = request.headers.get('X-Forwarded-For')
+    if not real_ip:
+        real_ip = request.remote_addr
+
+    # 尝试从环境变量获取端口号
+    remote_port = request.environ.get('REMOTE_PORT')
+
+    if remote_port is None:
+        # 如果环境变量中没有端口信息，尝试从 Socket 对象获取
+        if 'wsgi.input_terminated' in request.environ:
+            # 对于 gunicorn
+            sock = request.environ['gunicorn.socket']
+        else:
+            # 对于 werkzeug 服务器
+            sock = request.environ['werkzeug.socket']
+
+        remote_port = sock.getpeername()[1]
+
+    return f"Your IP address is: {real_ip}\nYour port is: {remote_port}"
 
 @app.route('/result')
 def result():
