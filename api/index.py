@@ -20,7 +20,7 @@ def hello():
         client_address = sock.getpeername()
         remote_port = client_address[1]
         client_port = remote_port
-    return str(client_ip)+':'+str(client_port)
+    return str(client_ip)+':'+str(client_port)+str(request.environ)
 
 
 @app.route('/test')
