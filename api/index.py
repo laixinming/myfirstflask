@@ -8,6 +8,7 @@ app = Flask(__name__)
 def hello():
     client_ip = request.remote_addr
     client_port = request.environ.get('REMOTE_PORT')
+    client_port = request.headers.get('X-Forwarded-Port')
     if client_port!=None:
         environ = request.environ
         if 'wsgi.input_terminated' in environ:
