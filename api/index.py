@@ -7,7 +7,7 @@ app = Flask(__name__)
 def hello():
     client_ip = request.remote_addr
     client_port = request.environ.get('REMOTE_PORT')
-    return client_ip+':'+client_port
+    return str(client_ip)+':'+str(client_port)
 
 
 @app.route('/test')
