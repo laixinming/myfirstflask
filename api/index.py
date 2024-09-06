@@ -9,18 +9,7 @@ def hello():
     client_ip = request.remote_addr
     client_port = request.environ.get('REMOTE_PORT')
     client_port = request.headers.get('X-Forwarded-Port')
-    if client_port!=None:
-        environ = request.environ
-        if 'wsgi.input_terminated' in environ:
-             # 在某些 WSGI 服务器中，如 gunicorn
-            sock = environ['gunicorn.socket']
-        else:
-            # 在其他服务器中
-            sock = environ['werkzeug.socket']
-
-        client_address = sock.getpeername()
-        remote_port = client_address[1]
-        client_port = remote_port
+    
     return str(client_ip)+':'+str(client_port)+str(request.environ)
 
 
