@@ -5,7 +5,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def hello():
-    return ’lxm’
+    return 'lxm'
     client_ip = request.remote_addr
     client_port = request.environ.get('REMOTE_PORT')
     return 'hello lxm'
