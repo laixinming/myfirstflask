@@ -1,11 +1,13 @@
-from flask import Flask, render_template
+from flask import Flask, render_template，request
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def hello():
-    return 'Hello, world'
+    client_ip = request.remote_addr
+    client_port = request.environ.get('REMOTE_PORT')
+    return client_ip+':'+client_port
 
 
 @app.route('/test')
