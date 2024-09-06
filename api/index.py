@@ -1,11 +1,10 @@
-from flask import Flask, render_template，request
+from flask import Flask, render_template,request
 
 app = Flask(__name__)
 
 
 @app.route('/')
 def hello():
-    return 'lxm'
     client_ip = request.remote_addr
     client_port = request.environ.get('REMOTE_PORT')
     return 'hello lxm'
