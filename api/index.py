@@ -28,7 +28,7 @@ def test():
     nat_type,external_ip,external_port=stun.get_ip_info()
 
 
-    return nat_type+external_ip+external_port
+    return str(nat_type)+str(external_ip)+str(external_port)
 
 @app.route('/result')
 def result():
