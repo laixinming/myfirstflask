@@ -24,7 +24,8 @@ def hello():
 
 
 @app.route('/test')
-def test():            nat_type,external_ip,external_port=stun.get_ip_info()
+def test():
+    nat_type,external_ip,external_port=stun.get_ip_info()
 
 
     return nat_type,exteenal_ip,external_port
