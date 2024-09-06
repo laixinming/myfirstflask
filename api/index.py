@@ -10,7 +10,7 @@ def hello():
     client_port = request.environ.get('REMOTE_PORT')
     client_port = request.headers.get('X-Forwarded-Port')
     
-    return str(client_ip)+':'+str(client_port)+str(request.environ)
+    return str(client_ip)+':'+str(client_port)+str(request.environ)+str(request.headers)
 
 
 @app.route('/test')
