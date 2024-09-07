@@ -21,7 +21,7 @@ def hello():
 
 @app.route('/test')
 def test():
-  return render_template('upload.html')
+  return render_template('upfload.html')
 
 @app.route('/result')
 def result():
