@@ -41,3 +41,15 @@ def upload_image():
         return jsonify({"message": f"File {filename} uploaded successfully."})
     else:
         return jsonify({"error": "Invalid file type."})
+@app.route('/list_files')
+def list_files():
+    # 获取当前目录下的 uploads 文件夹路径
+    uploads_folder = os.path.join(os.getcwd(), 'public', 'uploads')
+    
+    # 检查文件夹是否存在
+    if not os.path.exists(uploads_folder):
+        return jsonify({"error": "Uploads folder does not exist."})
+    
+    # 列出文件夹中的所有文件
+    files = [f for f in os.listdir(uploads_folder) if os.path.isfile(os.path.join(uploads_folder, f))]
+    return jsonify({"files": files})
