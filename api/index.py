@@ -45,7 +45,7 @@ def upload_image():
 def list_files():
     # 如果上传文件夹不存在，则创建它
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
+        os.makedirs(app.config['UPLOAD_FOLDER'])
     # 获取当前目录下的 uploads 文件夹路径
     uploads_folder =  './public/uploads/'
     
