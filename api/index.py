@@ -44,7 +44,7 @@ def upload_image():
 @app.route('/list_files')
 def list_files():
     # 获取当前目录下的 uploads 文件夹路径
-    uploads_folder = os.path.join(os.getcwd(), 'public', 'uploads')
+    uploads_folder =  './public/uploads/'
     
     # 检查文件夹是否存在
     if not os.path.exists(uploads_folder):
