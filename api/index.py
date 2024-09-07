@@ -2,7 +2,7 @@ from flask import Flask, render_template,request,jsonify
 import stun,os
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = './public/uploads/'
+app.config['UPLOAD_FOLDER'] = 'templates\'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
 
@@ -47,7 +47,7 @@ def list_files():
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'])
     # 获取当前目录下的 uploads 文件夹路径
-    uploads_folder =  './public/uploads/'
+    uploads_folder =  'templates\'
     
     # 检查文件夹是否存在
     if not os.path.exists(uploads_folder):
