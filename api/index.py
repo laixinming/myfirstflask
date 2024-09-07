@@ -37,7 +37,7 @@ def upload_image():
         return jsonify({"error": "No selected file"})
     if file and allowed_file(file.filename):
         filename = file.filename
-        file.save("./public/uploads/")
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         return jsonify({"message": f"File {filename} uploaded successfully."})
     else:
         return jsonify({"error": "Invalid file type."})
