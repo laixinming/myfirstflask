@@ -25,9 +25,6 @@ def hello():
 def test():
   return render_template('upload.html')
 
-
-    return str(nat_type)+str(external_ip)+str(external_port)
-
 @app.route('/result')
 def result():
    dict = {'phy':50,'che':60,'maths':70}
