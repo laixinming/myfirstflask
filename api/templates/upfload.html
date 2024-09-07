@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Image from Mobile</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Upload an Image</h1>
+    <input type="file" id="imageFile" accept="image/*">
+    <button id="uploadBtn">Upload Image</button>
+
+    <script>
+        $(document).ready(function () {
+            $('#uploadBtn').click(function () {
+                var fileInput = document.getElementById('imageFile');
+                var file = fileInput.files[0];
+                var formData = new FormData();
+                formData.append('file', file);
+
+                $.ajax({
+                    url: '/upload',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        alert(response.message);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert(jqXHR.responseJSON.error || "Failed to upload the image.");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
