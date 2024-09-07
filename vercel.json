@@ -1,9 +1,7 @@
 {
-    "rewrites": [
+  "rewrites": [
         { "source": "/(.*)", "destination": "/api/index" }
     ]
-}
-{
   "functions": {
     "postBuild": "node ./scripts/post-build.js",
     "predeploy": [
