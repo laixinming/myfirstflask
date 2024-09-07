@@ -3,3 +3,14 @@
         { "source": "/(.*)", "destination": "/api/index" }
     ]
 }
+{
+  "functions": {
+    "postBuild": "node ./scripts/post-build.js",
+    "predeploy": [
+      { "function": "build" }
+    ]
+  },
+  "routes": [
+    { "src": "/uploads/(.*)", "dest": "/uploads/$1" }
+  ]
+}
