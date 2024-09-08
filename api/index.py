@@ -3,14 +3,14 @@ from pyfakefs.fake_filesystem_unittest import Patcher
 
 import stun,os
 
-patcher = Patcher()
-patcher.start()
-base_dir = "/picture"
+
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/picture'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
-
+patcher = Patcher()
+patcher.start()
+base_dir = "/picture"
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
