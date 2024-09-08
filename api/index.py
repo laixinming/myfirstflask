@@ -4,6 +4,7 @@ import stun,base64
 
 upload_pic = [0]
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 设置最大请求大小为16MB
 app.config['UPLOAD_FOLDER'] = '/picture'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
