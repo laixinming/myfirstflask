@@ -2,7 +2,7 @@ from flask import Flask, render_template,request,jsonify
 
 import stun
 
-global upload_pic = []
+upload_pic = []
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/picture'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
@@ -39,11 +39,12 @@ def upload_image():
         return jsonify({"error": "No selected file"})
     if file and allowed_file(file.filename):
         filename = file.filename
+        global upload_pic
         upload_pic.append(file)
         return jsonify({"message": f"File {filename} uploaded successfully."})
     else:
         return jsonify({"error": "Invalid file type."})
 @app.route('/list_files')
 def list_files():
-    
+    global upload_pic
     return jsonify({"files":upload_pic})
