@@ -47,6 +47,6 @@ def upload_image():
 @app.route('/list_files')
 def list_files():
     global upload_pic
-    image_data = upload_pic[1].read()
+    image_data = upload_pic[0].read()
     encoded_image=base64.b64encode(image_data).decode('utf-8')
     return render_template('sending_pic.html',image_data=encoded_image)
