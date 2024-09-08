@@ -47,4 +47,4 @@ def upload_image():
 @app.route('/list_files')
 def list_files():
     global upload_pic
-    return jsonify({"files":upload_pic})
+    return render_template('sending_pic.html')
