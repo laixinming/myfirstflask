@@ -1,28 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Display Base64 Image</title>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Display Image</title>
 </head>
 <body>
-
-<h1>Base64 Image Display</h1>
-<img id="displayImage" src="" alt="Your image" style="display:none; max-width: 200px;">
-
-<script>
-$(document).ready(function() {
-    // 发起AJAX请求获取Base64编码的图片数据
-    $.getJSON('/list_files', function(data) {
-        var imgElement = $('#displayImage');
-        imgElement.attr('src', 'data:image/jpeg;base64,' + data.base64); // 假设是JPEG格式
-        
-        imgElement.css('display', 'block');
-    }).fail(function() {
-        alert("Failed to load the image.");
-    });
-});
-</script>
-
+    <h1>Image Displayed using Base64</h1>
+    <img src="data:image/jpeg;base64,{{ img_data }}">
 </body>
 </html>
