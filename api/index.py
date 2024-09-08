@@ -1,6 +1,6 @@
 from flask import Flask, render_template,request,jsonify
 
-import stun
+import stun,base64
 
 upload_pic = []
 app = Flask(__name__)
