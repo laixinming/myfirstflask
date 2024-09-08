@@ -1,6 +1,6 @@
 from flask import Flask, render_template,request,jsonify
 
-import stun,base64
+import stun,base64,threading
 
 upload_pic = [0]
 app = Flask(__name__)
@@ -30,21 +30,47 @@ def result():
    dict = {'phy':50,'che':60,'maths':70}
    return render_template('result.html', result = dict)
 
+@# 用于存储分块数据
+chunks = {}
+
+# 锁，用于确保并发安全
+lock = threading.Lock()
+
 @app.route('/upload', methods=['POST'])
-def upload_image():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"})
-    file = request.files['file']
-    
-    if file.filename == '':
-        return jsonify({"error": "No selected file"})
-    if file and allowed_file(file.filename):
-        filename = file.filename
-        global upload_pic
-        upload_pic[0] = (file.read())
-        return jsonify({"message": f"File {filename} uploaded successfully."})
-    else:
-        return jsonify({"error": "Invalid file type."})
+def upload_chunk():
+    # 获取分块文件
+    chunk = request.files.get('chunk')
+    chunk_index = int(request.form.get('chunkIndex'))
+    total_chunks = int(request.form.get('totalChunks'))
+    filename = request.form.get('filename')
+
+    # 加锁以确保线程安全
+    with lock:
+        if filename not in chunks:
+            chunks[filename] = [None] * total_chunks
+
+        # 将分块存储到内存中
+        chunks[filename][chunk_index] = chunk.read()
+
+    # 检查是否所有分块都已经上传完毕
+    if all(chunk is not None for chunk in chunks[filename]):
+        # 合并所有分块
+        merge_chunks(filename, total_chunks)
+
+    return jsonify({'message': f'分块{chunk_index}上传成功'}), 200
+
+def merge_chunks(filename, total_chunks):
+    # 合并分块文件
+    with lock:
+        file_content = b''.join(chunks[filename])
+        del chunks[filename]  # 清理内存
+
+    # 写入最终文件
+    with open(f'{filename}', 'wb') as f:
+        f.write(file_content)
+
+    return jsonify({'message': '文件合并完成'}), 200
+
 @app.route('/list_files')
 def list_files():
     global upload_pic
