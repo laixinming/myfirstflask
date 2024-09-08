@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Upload Image from Mobile</title>
+    <title>Upload Image from Mobile (Chunked)</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>Upload an Image</h1>
+    <h1>Upload an Image (Chunked)</h1>
     <input type="file" id="imageFile" accept="image/*">
     <button id="uploadBtn">Upload Image</button>
 
@@ -15,23 +15,47 @@
             $('#uploadBtn').click(function () {
                 var fileInput = document.getElementById('imageFile');
                 var file = fileInput.files[0];
-                var formData = new FormData();
-                formData.append('file', file);
 
-                $.ajax({
-                    url: '/upload',
-                    type: 'POST',
-                    data: formData,
-                    timeout:600000
-                    processData: false,
-                    contentType: false,
-                    success: function (response) {
-                        alert(response.message);
-                    },
-                    error: function (jqXHR, textStatus, errorThrown) {
-                        alert(jqXHR.responseJSON.error || "Failed to upload the image.");
-                    }
-                });
+                if (!file) {
+                    alert("请选择一个文件！");
+                    return;
+                }
+
+                var chunkSize = 1 * 1024 * 1024; // 每个分块的大小，这里设为1MB
+                var totalChunks = Math.ceil(file.size / chunkSize);
+                var uploadedChunks = 0;
+
+                function uploadChunk(chunkIndex) {
+                    var start = chunkIndex * chunkSize;
+                    var end = Math.min(start + chunkSize, file.size);
+                    var blob = file.slice(start, end);
+
+                    var formData = new FormData();
+                    formData.append('chunk', blob);
+                    formData.append('chunkIndex', chunkIndex);
+                    formData.append('totalChunks', totalChunks);
+
+                    $.ajax({
+                        url: '/upload',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                            uploadedChunks++;
+                            if (uploadedChunks === totalChunks) {
+                                alert("文件上传完成：" + response.message);
+                            } else {
+                                uploadChunk(uploadedChunks);
+                            }
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            alert("上传分块失败：" + jqXHR.responseJSON.error || "Failed to upload the chunk.");
+                        }
+                    });
+                }
+
+                uploadChunk(0);
             });
         });
     </script>
