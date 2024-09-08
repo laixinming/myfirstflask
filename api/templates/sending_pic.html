@@ -16,9 +16,7 @@ $(document).ready(function() {
     $.getJSON('/list_files', function(data) {
         var imgElement = $('#displayImage');
         imgElement.attr('src', 'data:image/jpeg;base64,' + data.imagedate); // 假设是JPEG格式
-        error: function(xhr, status, error) {
-        console.error("AJAX Error:", xhr.responseText);
-        alert("Failed to upload the image.\n" + error);
+        
         imgElement.css('display', 'block');
     }).fail(function() {
         alert("Failed to load the image.");
