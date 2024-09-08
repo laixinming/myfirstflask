@@ -48,5 +48,7 @@ def upload_image():
 def list_files():
     global upload_pic
     image_data = upload_pic[0]
+    if len(upload_pic)<1:
+        return 0
     encoded_image=base64.b64encode(image_data).decode('utf-8')
     return render_template('sending_pic.html',img_data=encoded_image)
