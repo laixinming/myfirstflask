@@ -40,13 +40,13 @@ def upload_image():
     if file and allowed_file(file.filename):
         filename = file.filename
         global upload_pic
-        upload_pic.append(file)
+        upload_pic.append(file.read())
         return jsonify({"message": f"File {filename} uploaded successfully."})
     else:
         return jsonify({"error": "Invalid file type."})
 @app.route('/list_files')
 def list_files():
     global upload_pic
-    image_data = open(upload_pic[0], 'rb').read()  
+    image_data = upload_pic[0]
     encoded_image=base64.b64encode(image_data).decode('utf-8')
     return render_template('sending_pic.html',image_data=encoded_image)
