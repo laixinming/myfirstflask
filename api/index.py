@@ -1,15 +1,12 @@
 from flask import Flask, render_template,request,jsonify
-from pyfakefs.fake_filesystem_unittest import Patcher
 
-import stun,os
+import stun
 
-
+global upload_pic = []
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/picture'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
-patcher = Patcher(modules=['os'])
-patcher.start()
 base_dir = "/picture"
 def allowed_file(filename):
     return '.' in filename and \
@@ -38,23 +35,16 @@ def upload_image():
     if 'file' not in request.files:
         return jsonify({"error": "No file part"})
     file = request.files['file']
+    
     if file.filename == '':
         return jsonify({"error": "No selected file"})
     if file and allowed_file(file.filename):
         filename = file.filename
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        upload_pic.append(file)
         return jsonify({"message": f"File {filename} uploaded successfully."})
     else:
         return jsonify({"error": "Invalid file type."})
 @app.route('/list_files')
 def list_files():
-    # 获取当前目录下的 uploads 文件夹路径
-    uploads_folder =  app.config['UPLOAD_FOLDER']
     
-    # 检查文件夹是否存在
-    if not os.path.exists(uploads_folder):
-        return jsonify({"error": "Uploads folder does not exist."})
-    
-    # 列出文件夹中的所有文件
-    files = [f for f in os.listdir(uploads_folder) if os.path.isfile(os.path.join(uploads_folder, f))]
-    return jsonify({"files": files})
+    return jsonify({"files":upload_pic})
