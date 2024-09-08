@@ -47,7 +47,7 @@ def upload_image():
 @app.route('/list_files')
 def list_files():
     global upload_pic
-    if len(upload_pic)<1:
+    if upload_pic[0]==0:
         return 'no pic'
     image_data = upload_pic[0]
     
