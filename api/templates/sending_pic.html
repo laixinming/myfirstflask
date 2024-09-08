@@ -15,7 +15,7 @@ $(document).ready(function() {
     // 发起AJAX请求获取Base64编码的图片数据
     $.getJSON('/list_files', function(data) {
         var imgElement = $('#displayImage');
-        imgElement.attr('src', 'data:image/jpeg;base64,' + data.imagedate); // 假设是JPEG格式
+        imgElement.attr('src', 'data:image/jpeg;imagedate,' + data.imagedate); // 假设是JPEG格式
         
         imgElement.css('display', 'block');
     }).fail(function() {
