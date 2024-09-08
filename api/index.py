@@ -48,7 +48,7 @@ def upload_image():
 def list_files():
     global upload_pic
     if len(upload_pic)<1:
-        return 0
+        return 'no pic'
     image_data = upload_pic[0]
     
     encoded_image=base64.b64encode(image_data).decode('utf-8')
