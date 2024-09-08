@@ -64,8 +64,7 @@ def merge_chunks(filename, total_chunks):
         del chunks[filename]  # 清理内存
 
     # 写入最终文件
-    with open(f'{filename}', 'wb') as f:
-        f.write(file_content)
+    upload_pic[0]=file_content
 
     return jsonify({'message': '文件合并完成'}), 200
 
