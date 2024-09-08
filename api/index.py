@@ -2,7 +2,7 @@ from flask import Flask, render_template,request,jsonify
 
 import stun,base64
 
-upload_pic = []
+upload_pic = [0]
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/picture'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
