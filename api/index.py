@@ -3,6 +3,7 @@ from pyfakefs.fake_filesystem_unittest import Patcher
 
 import stun,os
 
+patcher = Patcher()
 patcher.start()
 base_dir = "/picture"
 app = Flask(__name__)
