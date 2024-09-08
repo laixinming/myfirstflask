@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>显示图片</title>
+</head>
+<body>
+    <img id="myImage" src="" alt="示例图片">
+    <script>
+        // 使用 AJAX 请求图片数据
+        fetch('/list_files')
+            .then(response => response.blob())
+            .then(blob => {
+                const img = document.getElementById('myImage');
+                img.src = URL.createObjectURL(blob);  // 显示图片
+            });
+    </script>
+</body>
+</html>
