@@ -3,8 +3,10 @@ from pyfakefs.fake_filesystem_unittest import Patcher
 
 import stun,os
 
+patcher.start()
+base_dir = "/picture"
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = './public/uploads/'
+app.config['UPLOAD_FOLDER'] = '/picture'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
 
@@ -45,9 +47,6 @@ def upload_image():
         return jsonify({"error": "Invalid file type."})
 @app.route('/list_files')
 def list_files():
-    # 如果上传文件夹不存在，则创建它
-    if not os.path.exists(app.config['UPLOAD_FOLDER']):
-        os.makedirs(app.config['UPLOAD_FOLDER'])
     # 获取当前目录下的 uploads 文件夹路径
     uploads_folder =  app.config['UPLOAD_FOLDER']
     
