@@ -30,7 +30,7 @@ def result():
    dict = {'phy':50,'che':60,'maths':70}
    return render_template('result.html', result = dict)
 
-@# 用于存储分块数据
+# 用于存储分块数据
 chunks = {}
 
 # 锁，用于确保并发安全
