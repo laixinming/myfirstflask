@@ -7,7 +7,6 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/picture'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
-base_dir = "/picture"
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
