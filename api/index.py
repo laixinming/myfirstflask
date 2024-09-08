@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = '/picture'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
-patcher = Patcher()
+patcher = Patcher(modules=['os'])
 patcher.start()
 base_dir = "/picture"
 def allowed_file(filename):
