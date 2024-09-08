@@ -40,7 +40,7 @@ def upload_image():
     if file and allowed_file(file.filename):
         filename = file.filename
         global upload_pic
-        upload_pic.append(file.read())
+        upload_pic[0] = (file.read())
         return jsonify({"message": f"File {filename} uploaded successfully."})
     else:
         return jsonify({"error": "Invalid file type."})
