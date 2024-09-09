@@ -88,6 +88,6 @@ def list_files():
     
     try:
         # 返回一个Response对象，使用生成器流式传输数据
-        return Response(stream_image(image_data), mimetype="image/jpeg")
+        return Response(stream_image(image_data), mimetype="image/jpeg", direct_passthrough=True)
     except Exception as e:
         return str(e)
