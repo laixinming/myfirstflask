@@ -2,13 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Display Uploaded Image</title>
+    <title>Display Streamed Image</title>
+    <style>
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Uploaded Image</h1>
-    <div>
-        <!-- 假设你的list_files()函数可以通过 /list_files 路由访问 -->
-        <img src="/list_files" alt="Uploaded Picture">
-    </div>
+    <h1>Streamed Image Display</h1>
+    <img id="image" alt="Streamed Image" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const imgElement = document.getElementById('image');
+
+            // AJAX请求获取图片数据
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '/list_files', true);
+            xhr.responseType = 'blob';  // 设置响应类型为Blob
+            
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    // 将Blob对象转换为URL，并设置为img元素的src属性
+                    const blobUrl = URL.createObjectURL(xhr.response);
+                    imgElement.src = blobUrl;
+                } else {
+                    console.error('Failed to load image');
+                }
+            };
+            
+            xhr.onerror = function () {
+                console.error('Request failed');
+            };
+            
+            xhr.send();
+        });
+    </script>
 </body>
 </html>
