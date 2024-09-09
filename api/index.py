@@ -77,13 +77,11 @@ def list_files():
     # 逐块发送图片数据
     image_data = upload_pic[0]
     
-    def generate():
-        chunk_size = 4096  # 每次发送4KB
-        start = 0
-        while start < len(image_data):
-            end = min(start + chunk_size, len(image_data))
-            yield image_data[start:end]
-            start = end
-    
-    # 使用Response对象创建流式响应
-    return Response(generate(), mimetype='image/jpeg')
+    try:
+        # 使用BytesIO来处理二进制数据
+        image_stream = io.BytesIO(image_data)
+        
+        # 返回一个Response对象，设置正确的MIME类型
+        return Response(image_stream.getvalue(), mimetype="image/jpeg")
+    except Exception as e:
+        return str(e)
