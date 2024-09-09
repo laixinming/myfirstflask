@@ -12,7 +12,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const imgElement = document.getElementById('streamedImage');
 
-            fetch('/list_files')  // 请根据实际情况调整URL
+            fetch('https://www.lai-yu.eu.org/list_files')  // 请根据实际情况调整URL
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
