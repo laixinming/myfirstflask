@@ -73,15 +73,15 @@ def list_files():
     global upload_pic
     if not upload_pic or not upload_pic[0]:
         return 'no pic', 404
-    def stream_image(image_data):
-        buffer_size = 4096  # 每次发送的数据块大小
+    def stream_image(image_data, chunk_size=4096):
         image_stream = io.BytesIO(image_data)
     
         while True:
-            data = image_stream.read(buffer_size)
-            if not data:
+            chunk = image_stream.read(chunk_size)
+            if not chunk:
                 break
-            yield data
+            yield chunk
+    
         image_stream.close()
     # 逐块发送图片数据
     image_data = upload_pic[0]
