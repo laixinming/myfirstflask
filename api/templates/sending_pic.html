@@ -2,10 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Display Image</title>
+    <title>Display Uploaded Picture with Lazy Loading</title>
+    <style>
+        .lazy {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .lazy-loaded {
+            opacity: 1;
+        }
+    </style>
+    <script>
+        window.addEventListener("DOMContentLoaded", function() {
+            const images = document.querySelectorAll(".lazy");
+
+            const lazyLoad = (target) => {
+                const io = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            img.src = img.dataset.src;
+                            img.classList.add('lazy-loaded');
+                            observer.disconnect();
+                        }
+                    });
+                });
+
+                io.observe(target);
+            };
+
+            images.forEach(lazyLoad);
+        });
+    </script>
 </head>
 <body>
-    <h1>Image Displayed using Base64</h1>
-    <img src="data:image/jpeg;base64,{{ img_data }}">
+    <h1>Uploaded Picture</h1>
+    {% if img_data %}
+    <img class="lazy" data-src="data:image/png;base64,{{ img_data }}" alt="Uploaded Picture" width="600">
+    {% else %}
+    <p>No picture available.</p>
+    {% endif %}
 </body>
 </html>
