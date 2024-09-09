@@ -2,11 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Display Uploaded Image</title>
+    <title>Stream Image</title>
 </head>
 <body>
-    <h1>Uploaded Image</h1>
-    <!-- 使用img标签加载通过Flask路由返回的Base64图片数据 -->
-    <img src="{{ url_for('list_files', _external=True) }}" alt="Uploaded Picture">
+    <h1>Streamed Image</h1>
+    <img id="streamedImage" alt="Streamed Image">
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imgElement = document.getElementById('streamedImage');
+
+            fetch('http://localhost:5000/stream-image')  // 请根据实际情况调整URL
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.blob();  // 将响应转换为Blob对象
+                })
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);  // 创建Blob对象的URL
+                    imgElement.src = url;  // 设置图片源
+                })
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                });
+        });
+    </script>
 </body>
 </html>
