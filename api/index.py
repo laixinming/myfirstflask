@@ -73,12 +73,15 @@ def list_files():
     global upload_pic
     if upload_pic[0] == 0:
         return 'no pic'
-    
-    # 创建一个生成器函数来生成Base64编码的图片数据
+    # 逐块发送图片数据
+    image_data = upload_pic[0]
     def generate():
-        global upload_pic
-        image_data = upload_pic[0]
-        yield f'data:image/jpeg;base64,{base64.b64encode(image_data).decode("utf-8")}'
+        chunk_size = 4096  # 每次发送4KB
+        start = 0
+        while start < len(image_data):
+            end = min(start + chunk_size, len(image_data))
+            yield image_data[start:end]
+            start = end
 
     # 使用Response对象创建流式响应
-    return Response(generate(), mimetype='text/html')
+    return Response(generate(), mimetype='image/jpeg')
