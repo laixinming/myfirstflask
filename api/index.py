@@ -77,7 +77,7 @@ def list_files():
     # 创建一个生成器函数来生成Base64编码的图片数据
     def generate():
         image_data = upload_pic[0]
-        yield f'data:image/png;base64,{base64.b64encode(image_data).decode("utf-8")}'
+        yield f'data:image/jpeg;base64,{base64.b64encode(image_data).decode("utf-8")}'
 
     # 使用Response对象创建流式响应
     return Response(generate(), mimetype='text/html')
