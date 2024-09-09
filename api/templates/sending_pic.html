@@ -2,30 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Streamed Image</title>
+    <title>Display Uploaded Image</title>
 </head>
 <body>
-    <h1>Streamed Image</h1>
-    <img id="streamed-image" src="" alt="Streamed Image">
-    <script>
-        // 获取图片元素
-        var imgElement = document.getElementById('streamed-image');
-
-        // 使用Fetch API获取流式响应
-        fetch('/list_files')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.text(); // 读取响应体为文本
-            })
-            .then(html => {
-                // 从响应体中提取Base64编码的图片数据
-                let src = html.match(/src="([^"]+)"/)[1];
-                // 设置图片元素的src属性
-                imgElement.src = src;
-            })
-            .catch(error => console.error('There has been a problem with your fetch operation:', error));
-    </script>
+    <h1>Uploaded Image</h1>
+    <!-- 使用img标签加载通过Flask路由返回的Base64图片数据 -->
+    <img src="{{ url_for('list_files', _external=True) }}" alt="Uploaded Picture">
 </body>
 </html>
