@@ -71,10 +71,12 @@ def merge_chunks(filename, total_chunks):
 @app.route('/list_files')
 def list_files():
     global upload_pic
-    if upload_pic[0] == 0:
-        return 'no pic'
+    if not upload_pic or not upload_pic[0]:
+        return 'no pic', 404
+    
     # 逐块发送图片数据
     image_data = upload_pic[0]
+    
     def generate():
         chunk_size = 4096  # 每次发送4KB
         start = 0
@@ -82,6 +84,6 @@ def list_files():
             end = min(start + chunk_size, len(image_data))
             yield image_data[start:end]
             start = end
-
+    
     # 使用Response对象创建流式响应
     return Response(generate(), mimetype='image/jpeg')
