@@ -68,12 +68,10 @@ def merge_chunks(filename, total_chunks):
 
     return jsonify({'message': '文件合并完成'}), 200
 
-@app.route('/list_files')
-def list_files():
-    global upload_pic
-    if upload_pic[0]==0:
-        return 'no pic'
-    image_data = upload_pic[0]
-    
-    encoded_image=base64.b64encode(image_data).decode('utf-8')
-    return render_template('sending_pic.html',img_data=encoded_image)
+# 创建一个生成器函数来生成Base64编码的图片数据
+    def generate():
+        image_data = upload_pic[0]
+        yield f'data:image/png;base64,{base64.b64encode(image_data).decode("utf-8")}'
+
+    # 使用Response对象创建流式响应
+    return Response(generate(), mimetype='text/html')
