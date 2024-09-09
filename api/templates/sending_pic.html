@@ -2,45 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Display Uploaded Picture with Lazy Loading</title>
-    <style>
-        .lazy {
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-        .lazy-loaded {
-            opacity: 1;
-        }
-    </style>
-    <script>
-        window.addEventListener("DOMContentLoaded", function() {
-            const images = document.querySelectorAll(".lazy");
-
-            const lazyLoad = (target) => {
-                const io = new IntersectionObserver((entries, observer) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const img = entry.target;
-                            img.src = img.dataset.src;
-                            img.classList.add('lazy-loaded');
-                            observer.disconnect();
-                        }
-                    });
-                });
-
-                io.observe(target);
-            };
-
-            images.forEach(lazyLoad);
-        });
-    </script>
+    <title>Streamed Image</title>
 </head>
 <body>
-    <h1>Uploaded Picture</h1>
-    {% if img_data %}
-    <img class="lazy" data-src="data:image/png;base64,{{ img_data }}" alt="Uploaded Picture" width="600">
-    {% else %}
-    <p>No picture available.</p>
-    {% endif %}
+    <h1>Streamed Image</h1>
+    <img id="streamed-image" src="" alt="Streamed Image">
+    <script>
+        // 获取图片元素
+        var imgElement = document.getElementById('streamed-image');
+
+        // 使用Fetch API获取流式响应
+        fetch('/list_files')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text(); // 读取响应体为文本
+            })
+            .then(html => {
+                // 从响应体中提取Base64编码的图片数据
+                let src = html.match(/src="([^"]+)"/)[1];
+                // 设置图片元素的src属性
+                imgElement.src = src;
+            })
+            .catch(error => console.error('There has been a problem with your fetch operation:', error));
+    </script>
 </body>
 </html>
