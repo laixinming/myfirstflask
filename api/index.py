@@ -1,6 +1,6 @@
 from flask import Flask, render_template,request,jsonify
 
-import stun,base64,threading
+import stun,base64,threading,io
 
 upload_pic = [0]
 app = Flask(__name__)
