@@ -73,15 +73,21 @@ def list_files():
     global upload_pic
     if not upload_pic or not upload_pic[0]:
         return 'no pic', 404
+    def stream_image(image_data):
+        buffer_size = 4096  # 每次发送的数据块大小
+        image_stream = io.BytesIO(image_data)
     
+        while True:
+            data = image_stream.read(buffer_size)
+            if not data:
+                break
+            yield data
+        image_stream.close()
     # 逐块发送图片数据
     image_data = upload_pic[0]
     
     try:
-        # 使用BytesIO来处理二进制数据
-        image_stream = io.BytesIO(image_data)
-        
-        # 返回一个Response对象，设置正确的MIME类型
-        return Response(image_stream.getvalue(), mimetype="image/jpeg")
+        # 返回一个Response对象，使用生成器流式传输数据
+        return Response(stream_image(image_data), mimetype="image/jpeg")
     except Exception as e:
         return str(e)
