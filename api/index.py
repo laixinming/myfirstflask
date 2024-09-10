@@ -31,7 +31,7 @@ def result():
 
 @app.route('/list_files')
 def test():
-  return render_template('sending.html')
+  return render_template('sending_pic.html')
 
 @app.route('/result')
 def result():
@@ -78,7 +78,7 @@ def merge_chunks(filename, total_chunks):
 
     return jsonify({'message': '文件合并完成'}), 200
 
-@app.route('/list_files')
+@app.route('/download')
 def list_files():
     global upload_pic
     if not upload_pic or not upload_pic[0]:
