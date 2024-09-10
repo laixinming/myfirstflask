@@ -74,21 +74,33 @@ def list_files():
     global upload_pic
     if not upload_pic or not upload_pic[0]:
         return 'no pic', 404
-    def stream_image(image_data, chunk_size=4096):
-        image_stream = io.BytesIO(image_data)
-    
-        while True:
-            chunk = image_stream.read(chunk_size)
-            if not chunk:
-                break
-            yield chunk
-    
-        image_stream.close()
-    # 逐块发送图片数据
-    image_data = upload_pic[0]
-    
-    try:
-        # 返回一个Response对象，使用生成器流式传输数据
-        return Response(stream_image(image_data), mimetype="image/jpeg", direct_passthrough=True)
-    except Exception as e:
-        return str(e)
+    file_content = upload_pic[0]
+    # 获取客户端请求的范围
+    range_header = request.headers.get('Range', None)
+    if not range_header:
+        # 如果没有指定范围，则返回整个文件
+        return Response(file_content, mimetype='application/octet-stream')
+
+    # 解析 Range 请求头
+    range_start, range_end = parse_range_header(range_header, len(file_content))
+
+    # 创建一个文件对象
+    file_stream = io.BytesIO(file_content[range_start:range_end + 1])
+
+    # 设置响应头
+    response = Response(file_stream.getvalue(), 206, mimetype='application/octet-stream', direct_passthrough=True)
+    response.headers.add('Content-Range', f'bytes {range_start}-{range_end}/{len(file_content)}')
+    response.headers.add('Content-Length', str(range_end - range_start + 1))
+    response.headers.add('Accept-Ranges', 'bytes')
+
+    return response
+
+def parse_range_header(range_header, file_length):
+    # 解析 Range 请求头
+    range_match = re.match(r'bytes=(\d+)-(\d*)', range_header)
+    if range_match:
+        start = int(range_match.group(1))
+        end = int(range_match.group(2)) if range_match.group(2) else file_length - 1
+        return start, end
+    return 0, file_length - 1
+
