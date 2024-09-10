@@ -2,84 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>分块下载示例</title>
+    <title>File Download Example</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>分块下载示例</h1>
-    <button id="downloadButton">开始下载</button>
-    <progress id="downloadProgress" value="0" max="100"></progress>
+    <button id="downloadButton">Download File</button>
 
     <script>
-        document.getElementById('downloadButton').addEventListener('click', function() {
-            const url = '/download';
-            const chunkSize = 1024 * 1024 * 2; // 每次请求2MB
-            const chunks = [];
-            let start = 0;
-            let totalSize = null;
-            let xhr = null;
-            let abort = false;
+        $(document).ready(function() {
+            $('#downloadButton').click(function() {
+                var url = '/download';
+                var xhr;
 
-            function downloadChunk(start, end) {
-                xhr = new XMLHttpRequest();
-                xhr.open('GET', url, true);
-                xhr.setRequestHeader('Range', `bytes=${start}-${end}`);
-                xhr.responseType = 'arraybuffer';
-                xhr.onload = function() {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        const blob = new Blob([this.response], {type: 'application/octet-stream'});
-                        chunks.push(blob);
-                        updateProgress((start / totalSize) * 100);
+                // 模拟已经下载的部分，这里只是示例，实际应用中应该根据已下载部分设置
+                var downloadedPart = 0; // 假设已经下载了0字节
 
-                        if (start < totalSize - 1) {
-                            start = end + 1;
-                            const nextEnd = Math.min(start + chunkSize - 1, totalSize - 1);
-                            downloadChunk(start, nextEnd);
-                        } else {
-                            mergeBlobsAndDownload(chunks);
+                // 发起 AJAX 请求
+                xhr = $.ajax({
+                    url: url,
+                    method: 'GET',
+                    headers: {
+                        'Range': 'bytes=' + downloadedPart + '-'
+                    },
+                    xhr: function() {
+                        // 这里创建一个新的 XHR 对象
+                        var myXhr = $.ajaxSettings.xhr();
+                        if (myXhr.upload) { // 浏览器兼容性检查
+                            myXhr.upload.addEventListener('progress', function(e) {
+                                if (e.lengthComputable) {
+                                    var percentComplete = e.loaded / e.total;
+                                    console.log('Download progress: ' + Math.round(percentComplete * 100) + '%');
+                                }
+                            }, false);
                         }
-                    } else {
-                        console.error('Error downloading chunk:', xhr.status);
+                        return myXhr;
+                    },
+                    success: function(response, textStatus, jqXHR) {
+                        console.log('Download completed!');
+                        // 这里处理下载完成后的逻辑
+                        // 可以保存到本地文件系统
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('Error while downloading: ' + errorThrown);
                     }
-                };
-                xhr.onerror = function() {
-                    console.error('Network error occurred.');
-                };
-                xhr.onprogress = function(e) {
-                    if (e.lengthComputable) {
-                        updateProgress(((start + e.loaded) / totalSize) * 100);
-                    }
-                };
-                xhr.send();
-            }
-
-            function mergeBlobsAndDownload(blobs) {
-                const blob = new Blob(blobs, {type: 'application/octet-stream'});
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = 'largefile.mp4';
-                document.body.appendChild(a);
-                a.click();
-                setTimeout(() => {
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                }, 0);
-            }
-
-            function updateProgress(percentage) {
-                document.getElementById('downloadProgress').value = percentage;
-            }
-
-            xhr.open('HEAD', url, true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    totalSize = parseInt(xhr.getResponseHeader('Content-Length'), 10);
-                    const end = Math.min(start + chunkSize - 1, totalSize - 1);
-                    downloadChunk(start, end);
-                }
-            };
-            xhr.send();
+                });
+            });
         });
     </script>
 </body>
