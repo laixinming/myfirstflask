@@ -31,6 +31,8 @@ def result():
 
 @app.route('/list_files')
 def list_files():
+  if not upload_pic or not upload_pic[0]:
+        return 'no pic', 404
   return render_template('sending_pic.html')
 
 # 用于存储分块数据
@@ -76,8 +78,7 @@ def merge_chunks(filename, total_chunks):
 @app.route('/download',methods=['GET'])
 def downloads():
     global upload_pic
-    if not upload_pic or not upload_pic[0]:
-        return 'no pic', 404
+    
     file_content = upload_pic[0]
     # 获取客户端请求的范围
     range_header = request.headers.get('Range', None)
