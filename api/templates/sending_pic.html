@@ -2,50 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>File Download Example</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Download File in Chunks</title>
 </head>
 <body>
-    <button id="downloadButton">Download File</button>
+    <button id="downloadButton">点击下载文件</button>
 
     <script>
-        $(document).ready(function() {
-            $('#downloadButton').click(function() {
-                var url = '/download';
-                var xhr;
+        document.getElementById('downloadButton').addEventListener('click', function() {
+            const chunkSize = 1024 * 1024; // 每次请求 1MB
+            let currentChunkStart = 0;
+            let fileContent = new Uint8Array();
+            let totalLength = null;
 
-                // 模拟已经下载的部分，这里只是示例，实际应用中应该根据已下载部分设置
-                var downloadedPart = 0; // 假设已经下载了0字节
-
-                // 发起 AJAX 请求
-                xhr = $.ajax({
-                    url: url,
-                    method: 'GET',
+            async function fetchChunk(start, end) {
+                const response = await fetch('/download', {
                     headers: {
-                        'Range': 'bytes=' + downloadedPart + '-'
-                    },
-                    xhr: function() {
-                        // 这里创建一个新的 XHR 对象
-                        var myXhr = $.ajaxSettings.xhr();
-                        if (myXhr.upload) { // 浏览器兼容性检查
-                            myXhr.upload.addEventListener('progress', function(e) {
-                                if (e.lengthComputable) {
-                                    var percentComplete = e.loaded / e.total;
-                                    console.log('Download progress: ' + Math.round(percentComplete * 100) + '%');
-                                }
-                            }, false);
-                        }
-                        return myXhr;
-                    },
-                    success: function(response, textStatus, jqXHR) {
-                        console.log('Download completed!');
-                        // 这里处理下载完成后的逻辑
-                        // 可以保存到本地文件系统
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        console.error('Error while downloading: ' + errorThrown);
+                        Range: `bytes=${start}-${end}`
                     }
                 });
+
+                if (response.status === 206) {
+                    const chunk = await response.arrayBuffer();
+                    const chunkArray = new Uint8Array(chunk);
+                    fileContent.set(chunkArray, start);
+                    return true;
+                } else if (response.status === 416) {
+                    // 文件已完整下载
+                    console.log("文件已完整下载");
+                    return false;
+                } else {
+                    throw new Error(`Failed to fetch chunk ${start}-${end}: ${response.statusText}`);
+                }
+            }
+
+            async function downloadFile() {
+                try {
+                    while (true) {
+                        const end = Math.min(currentChunkStart + chunkSize - 1, totalLength - 1);
+                        const result = await fetchChunk(currentChunkStart, end);
+                        if (!result) break;
+                        currentChunkStart = end + 1;
+                    }
+
+                    // 创建 Blob 并下载文件
+                    const blob = new Blob([fileContent], {type: 'application/octet-stream'});
+                    const url = window.URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = 'downloadedfile.ext';
+                    link.click();
+                    window.URL.revokeObjectURL(url);
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+
+            // 获取文件长度
+            fetch('/download', {
+                method: 'HEAD'
+            }).then(response => {
+                totalLength = parseInt(response.headers.get('Content-Length'));
+                downloadFile();
             });
         });
     </script>
