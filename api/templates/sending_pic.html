@@ -2,68 +2,96 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Download File in Chunks</title>
+    <title>Download File with Chunk Progress</title>
 </head>
 <body>
     <button id="downloadButton">点击下载文件</button>
+    <div id="progress" style="display:none;">
+        <p>下载进度:</p>
+        <progress id="downloadProgress" value="0" max="100"></progress>
+        <p id="status"></p>
+    </div>
 
     <script>
         document.getElementById('downloadButton').addEventListener('click', function() {
+            document.getElementById('progress').style.display = 'block';
+            document.getElementById('status').textContent = '开始下载...';
+
             const chunkSize = 1024 * 1024; // 每次请求 1MB
             let currentChunkStart = 0;
-            let fileContent = new Uint8Array();
+            let fileContent = [];
             let totalLength = null;
+            let downloadedLength = 0;
 
-            async function fetchChunk(start, end) {
-                const response = await fetch('/download', {
-                    headers: {
-                        Range: `bytes=${start}-${end}`
+            function fetchChunk(start, end, callback) {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', '/download', true);
+                xhr.setRequestHeader('Range', `bytes=${start}-${end}`);
+                xhr.responseType = 'arraybuffer';
+
+                xhr.onprogress = function(event) {
+                    if (event.lengthComputable) {
+                        const percentComplete = (downloadedLength / totalLength) * 100;
+                        document.getElementById('downloadProgress').value = Math.round(percentComplete);
                     }
-                });
+                };
 
-                if (response.status === 206) {
-                    const chunk = await response.arrayBuffer();
-                    const chunkArray = new Uint8Array(chunk);
-                    fileContent.set(chunkArray, start);
-                    return true;
-                } else if (response.status === 416) {
-                    // 文件已完整下载
-                    console.log("文件已完整下载");
-                    return false;
-                } else {
-                    throw new Error(`Failed to fetch chunk ${start}-${end}: ${response.statusText}`);
-                }
+                xhr.onload = function() {
+                    if (xhr.status === 206) {
+                        const chunk = new Uint8Array(xhr.response);
+                        fileContent.push(chunk);
+                        downloadedLength += chunk.byteLength;
+                        callback(true);
+                    } else if (xhr.status === 416) {
+                        // 文件已完整下载
+                        callback(false);
+                    } else {
+                        throw new Error(`Failed to fetch chunk ${start}-${end}: ${xhr.statusText}`);
+                    }
+                };
+
+                xhr.onerror = function() {
+                    console.error('Error fetching chunk.');
+                    callback(false);
+                };
+
+                xhr.send();
             }
 
-            async function downloadFile() {
+            function downloadFile() {
                 try {
-                    while (true) {
-                        const end = Math.min(currentChunkStart + chunkSize - 1, totalLength - 1);
-                        const result = await fetchChunk(currentChunkStart, end);
-                        if (!result) break;
-                        currentChunkStart = end + 1;
-                    }
+                    fetch('/download', {
+                        method: 'HEAD'
+                    }).then(response => {
+                        totalLength = parseInt(response.headers.get('Content-Length'));
+                        const numChunks = Math.ceil(totalLength / chunkSize);
 
-                    // 创建 Blob 并下载文件
-                    const blob = new Blob([fileContent], {type: 'application/octet-stream'});
-                    const url = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = 'downloadedfile.ext';
-                    link.click();
-                    window.URL.revokeObjectURL(url);
+                        for (let i = 0; i < numChunks; i++) {
+                            const start = currentChunkStart;
+                            const end = Math.min(start + chunkSize - 1, totalLength - 1);
+                            fetchChunk(start, end, function(result) {
+                                if (!result) {
+                                    // 文件已完整下载
+                                    const blob = new Blob(fileContent, { type: 'application/octet-stream' });
+                                    const url = window.URL.createObjectURL(blob);
+                                    const link = document.createElement('a');
+                                    link.href = url;
+                                    link.download = 'downloadedfile.ext';
+                                    link.click();
+                                    window.URL.revokeObjectURL(url);
+                                    document.getElementById('status').textContent = '下载完成!';
+                                } else {
+                                    currentChunkStart = end + 1;
+                                }
+                            });
+                        }
+                    });
                 } catch (error) {
                     console.error(error);
                 }
             }
 
-            // 获取文件长度
-            fetch('/download', {
-                method: 'HEAD'
-            }).then(response => {
-                totalLength = parseInt(response.headers.get('Content-Length'));
-                downloadFile();
-            });
+            downloadFile();
         });
     </script>
 </body>
