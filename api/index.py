@@ -73,7 +73,7 @@ def merge_chunks(filename, total_chunks):
 
     return jsonify({'message': '文件合并完成'}), 200
 
-@app.route('/download'，methods=['GET'])
+@app.route('/download',methods=['GET'])
 def downloads():
     global upload_pic
     if not upload_pic or not upload_pic[0]:
