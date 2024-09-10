@@ -92,7 +92,6 @@ def downloads():
 
     # 解析 Range 请求头
     range_start, range_end = parse_range_header(range_header, len(file_content))
-
     # 创建一个文件对象
     file_stream = io.BytesIO(file_content[range_start:range_end + 1])
 
