@@ -33,11 +33,6 @@ def result():
 def list_files():
   return render_template('sending_pic.html')
 
-@app.route('/result')
-def result():
-   dict = {'phy':50,'che':60,'maths':70}
-   return render_template('result.html', result = dict)
-
 # 用于存储分块数据
 chunks = {}
 
