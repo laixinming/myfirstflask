@@ -12,7 +12,7 @@
     <script>
         document.getElementById('downloadButton').addEventListener('click', function() {
             const url = '/list_files';
-            const chunkSize = 1024 * 1024 * 5; // 每次请求5MB
+            const chunkSize = 1024 * 1024 * 2; // 每次请求2MB
             const chunks = [];
             let start = 0;
             let totalSize = null;
