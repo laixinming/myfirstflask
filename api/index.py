@@ -16,8 +16,9 @@ def hello():
     client_ip = request.remote_addr
     client_port = request.environ.get('REMOTE_PORT')
     client_port = request.headers.get('X-Forwarded-Port')
+    return render_template('show.html')
     
-    return '你好yyp!\r\n'+str(client_ip)
+    #return '你好yyp!\r\n'+str(client_ip)
 
 
 @app.route('/test')
