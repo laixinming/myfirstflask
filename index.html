@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>共享画廊 · Vercel KV + 双击放大</title>
+    <title>共享画廊 · 自动循环视频</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        /* 原有样式保持不变，追加放大遮罩层样式 */
+        /* 样式完全沿用之前版本，包含图片放大遮罩层 */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -26,7 +26,6 @@
             touch-action: pan-y pinch-zoom; 
         }
 
-        /* 主滑动容器 — 横向分页卡片 */
         .cards-container {
             display: flex;
             overflow-x: auto;
@@ -171,7 +170,7 @@
             background: #1a1a1a;
             border-radius: 18px;
             display: block;
-            cursor: pointer; /* 提示可双击 */
+            cursor: pointer;
         }
         .media-content video {
             width: 100%;
@@ -259,7 +258,7 @@
             display: none;
         }
 
-        /* ---------- 新增：图片放大遮罩层 ---------- */
+        /* 图片放大遮罩层 */
         #imageOverlay {
             display: none;
             position: fixed;
@@ -284,8 +283,6 @@
 </head>
 <body>
     <div class="cards-container" id="cardsContainer"></div>
-
-    <!-- 图片双击放大遮罩层 -->
     <div id="imageOverlay" onclick="this.style.display='none'">
         <img id="overlayImage" src="" alt="">
     </div>
@@ -296,10 +293,7 @@
             let cards = [];
             let nextId = 1000;
 
-            // 引入 ioredis 客户端（已在 serverless function 中使用，前端无需关心）
-            // 前端只需要通过 API 与后端通信
-
-            // ---------- API 调用 ----------
+            // API 调用（与之前相同）
             async function fetchCards() {
                 try {
                     const res = await fetch('/api/cards');
@@ -343,7 +337,6 @@
                 }
             }
 
-            // ---------- 卡片操作 ----------
             function createEmptyCard() {
                 return {
                     id: nextId++,
@@ -414,7 +407,8 @@
                 if (field === 'imageUrl') {
                     contentHtml = `<img src="${escapeHtml(url)}" alt="image" loading="lazy" onerror="this.style.opacity=0.5; this.alt='❌加载失败'">`;
                 } else if (field === 'videoUrl') {
-                    contentHtml = `<video src="${escapeHtml(url)}" controls playsinline preload="metadata" onerror="this.outerHTML='<div class=\'message-placeholder\'>❌ 视频无法加载</div>'"></video>`;
+                    // 关键修改：添加 autoplay loop muted 实现自动循环播放
+                    contentHtml = `<video src="${escapeHtml(url)}" controls autoplay loop muted playsinline preload="metadata" onerror="this.outerHTML='<div class=\'message-placeholder\'>❌ 视频无法加载</div>'"></video>`;
                 } else if (field === 'markdownUrl') {
                     if (card.markdownHtml) {
                         contentHtml = `<div class="markdown-body">${card.markdownHtml}</div>`;
@@ -538,9 +532,8 @@
                 }, 30);
             }
 
-            // ---------- 事件委托 ----------
+            // 事件委托
             CONTAINER.addEventListener('click', async (e) => {
-                // 删除按钮
                 if (e.target.closest('.delete-card-btn')) {
                     const btn = e.target.closest('.delete-card-btn');
                     const cardId = Number(btn.dataset.cardId);
@@ -586,11 +579,10 @@
                 await setCardField(cardId, field, newUrl);
             });
 
-            // ---------- 双击图片放大 ----------
+            // 双击图片放大
             document.addEventListener('dblclick', function(e) {
                 const img = e.target.closest('img');
                 if (!img) return;
-                // 确保是卡片内的图片
                 if (!img.closest('.card')) return;
                 const overlay = document.getElementById('imageOverlay');
                 const overlayImg = document.getElementById('overlayImage');
