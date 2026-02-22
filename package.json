@@ -1,7 +1,7 @@
 {
-  "name": "shared-gallery-vercel-kv",
+  "name": "shared-gallery-vercel",
   "version": "1.0.0",
   "dependencies": {
-    "@vercel/kv": "^1.0.0"
+    "ioredis": "^5.3.2"
   }
 }
