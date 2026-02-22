@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>共享画廊 · Vercel KV</title>
+    <title>共享画廊 · Vercel KV + 双击放大</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
+        /* 原有样式保持不变，追加放大遮罩层样式 */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -170,6 +171,7 @@
             background: #1a1a1a;
             border-radius: 18px;
             display: block;
+            cursor: pointer; /* 提示可双击 */
         }
         .media-content video {
             width: 100%;
@@ -256,15 +258,46 @@
         .media-block.empty .edit-icon {
             display: none;
         }
+
+        /* ---------- 新增：图片放大遮罩层 ---------- */
+        #imageOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        #overlayImage {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
     </style>
 </head>
 <body>
     <div class="cards-container" id="cardsContainer"></div>
+
+    <!-- 图片双击放大遮罩层 -->
+    <div id="imageOverlay" onclick="this.style.display='none'">
+        <img id="overlayImage" src="" alt="">
+    </div>
+
     <script>
         (function() {
             const CONTAINER = document.getElementById('cardsContainer');
             let cards = [];
             let nextId = 1000;
+
+            // 引入 ioredis 客户端（已在 serverless function 中使用，前端无需关心）
+            // 前端只需要通过 API 与后端通信
 
             // ---------- API 调用 ----------
             async function fetchCards() {
@@ -272,13 +305,11 @@
                     const res = await fetch('/api/cards');
                     const data = await res.json();
                     cards = data.cards || [];
-                    // 确保每张卡片有 markdownHtml 字段
                     cards = cards.map(c => ({ ...c, markdownHtml: c.markdownHtml || '' }));
                     if (cards.length === 0) {
                         cards = [createEmptyCard()];
-                        await syncCardToServer(cards[0]); // 将空白卡片保存到服务器
+                        await syncCardToServer(cards[0]);
                     }
-                    // 更新 nextId
                     const maxId = cards.reduce((max, c) => Math.max(max, c.id), 1000);
                     nextId = maxId + 1;
                     renderAllCards();
@@ -366,7 +397,6 @@
 
                 const url = card[field];
 
-                // 空状态：加号占位
                 if (!url) {
                     blockElement.classList.add('empty');
                     blockElement.innerHTML = `
@@ -422,7 +452,6 @@
                     const text = await response.text();
                     const html = marked.parse(text, { mangle: false, headerIds: false });
                     card.markdownHtml = html;
-                    // 更新界面
                     const freshBlock = document.querySelector(`.card[data-card-id="${card.id}"] .card-markdown`);
                     if (freshBlock) {
                         freshBlock.innerHTML = `
@@ -432,7 +461,6 @@
                             </div>
                         `;
                     }
-                    // 同步到服务器（保存 markdownHtml）
                     await syncCardToServer(card);
                 } catch (err) {
                     console.warn('markdown加载失败', err);
@@ -447,7 +475,6 @@
                 }
             }
 
-            // 更新卡片字段
             async function setCardField(cardId, field, newUrl) {
                 const idx = findCardIndex(cardId);
                 if (idx === -1) return;
@@ -465,7 +492,6 @@
                 renderSingleField(cardId, field);
                 await syncCardToServer(card);
 
-                // 检查并自动追加新卡片（如果是最后一张且已填满）
                 maybeAppendNewCard(cardId);
             }
 
@@ -476,7 +502,7 @@
                 if (lastCard.imageUrl && lastCard.videoUrl && lastCard.markdownUrl) {
                     const newCard = createEmptyCard();
                     cards.push(newCard);
-                    await syncCardToServer(newCard); // 新卡片保存到服务器
+                    await syncCardToServer(newCard);
                     renderAllCards();
                     setTimeout(() => {
                         const newIndex = cards.length - 1;
@@ -488,7 +514,6 @@
                 }
             }
 
-            // 删除卡片
             async function deleteCard(cardId) {
                 const idx = findCardIndex(cardId);
                 if (idx === -1) return;
@@ -513,7 +538,7 @@
                 }, 30);
             }
 
-            // 事件委托
+            // ---------- 事件委托 ----------
             CONTAINER.addEventListener('click', async (e) => {
                 // 删除按钮
                 if (e.target.closest('.delete-card-btn')) {
@@ -559,6 +584,19 @@
                 if (newUrl === '') newUrl = null;
 
                 await setCardField(cardId, field, newUrl);
+            });
+
+            // ---------- 双击图片放大 ----------
+            document.addEventListener('dblclick', function(e) {
+                const img = e.target.closest('img');
+                if (!img) return;
+                // 确保是卡片内的图片
+                if (!img.closest('.card')) return;
+                const overlay = document.getElementById('imageOverlay');
+                const overlayImg = document.getElementById('overlayImage');
+                overlayImg.src = img.src;
+                overlay.style.display = 'flex';
+                e.preventDefault();
             });
 
             // 初始化
